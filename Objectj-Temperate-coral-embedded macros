@@ -19,10 +19,10 @@ macro "Wakame [f]"{ojSwitchToItem("Wakame_Undaria");}
 
 //Prepare some variable for later
 //Prepare variable for file name
-var   dir=getDirectory("image");
-var   name = getTitle() + "PointCoordinates.txt";
+dir=getDirectory("image");
+name = getTitle() + "PointCoordinates.txt";
 //check if file exists
-var   check = File.exists(dir+name);
+check = File.exists(dir+name);
 
 //adding, hiding an removing labels and point
 macro "Update Initials [7]"{ 
@@ -68,6 +68,11 @@ function updateMyLabels(wholeStr){
 
 macro "Clear all to start again"{
 	run("Remove Overlay");
+	//Prepare variable for file name
+	dir=getDirectory("image");
+	name = getTitle() + "PointCoordinates.txt";
+	//check if file exists
+	check = File.exists(dir+name);
 //	itemNames = split(ojGetItemNames());
 //	nTypes = itemNames.length;
 //	for (m=1; m < nTypes; m++){ojDeleteItem(nTypes, m);
@@ -129,6 +134,9 @@ macro "Draw Random Points [0]"{
 	setColor(255,0,0);
 	width = getWidth();
 	height = getHeight();
+	//Prepare variable for file name
+	dir=getDirectory("image");
+	name = getTitle() + "PointCoordinates.txt";
 //check if coordinate file exists
 	check = File.exists(dir+name);
 	if (check == 0){
