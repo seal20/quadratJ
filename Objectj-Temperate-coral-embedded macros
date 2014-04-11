@@ -1,0 +1,158 @@
+//Short cut and menu entry for specific marker. You need to modify these if the object list were modify.
+macro "Healthy Coral [1]"{ojSwitchToItem("healthy_coral");}
+macro "Bleached Coral [2]"{ ojSwitchToItem("bleached_coral");}
+macro "Dead Coral [3]"{ ojSwitchToItem("dead_coral");}
+macro "Branched coralline algae[q]"{ojSwitchToItem("branched_coralline_algae");}
+macro "Crustose Coralline algae [w]"{ojSwitchToItem("crustose_coralline_algae");}
+macro "Obamoku [e]"{ojSwitchToItem("Obamoku_Sargassum_ringoldianum");}
+macro "Makusa [a]"{ojSwitchToItem("Makusa_Gelidium_sp");}
+macro "Fukuronori [s]"{ojSwitchToItem("Fukuronori_Colpomenia_sinuosa");}
+macro "Akamoku [d]"{ojSwitchToItem("Akamoku_Sargassum_horneri");}
+macro "Kajime [z]"{ojSwitchToItem("Kajime_Ecklonia_cava");}
+macro "Arame [x]"{ojSwitchToItem("Arame_Eisenia_bicyclis");}
+macro "Algae other [c]"{ojSwitchToItem("Algae_other");}
+macro "Bare substrate [4]"{ojSwitchToItem("bare_substrate");}
+macro "Off limit [5]"{ojSwitchToItem("off");}
+macro "Umiuchiwa [r]"{ojSwitchToItem("Umiuchiwa_Padina_arborescens");}
+macro "Wakame [f]"{ojSwitchToItem("Wakame_Undaria");}
+
+
+//Prepare some variable for later
+//Prepare variable for file name
+var   dir=getDirectory("image");
+var   name = getTitle() + "PointCoordinates.txt";
+//check if file exists
+var   check = File.exists(dir+name);
+
+//adding, hiding an removing labels and point
+macro "Update Initials [7]"{ 
+	updateMyLabels(false);
+}
+
+macro "Update Labels [8]"{
+	updateMyLabels(true);
+}
+
+
+macro "Hide Labels [9]"{
+	run("Hide Overlay");
+}
+
+
+function updateMyLabels(wholeStr){
+	fontSize = 18;
+	first = true;
+	for (obj = 1; obj <= ojNObjects(); obj++){
+		if (ojOwnerIndex(obj) == ojImageLink()){
+			ojSelectObject(obj);
+			slc = ojZPos(1);
+			x = ojXPos(1);
+			y = ojYPos(1);
+			if (getSliceNumber == slc){
+				if (first)
+					run("Remove Overlay");
+				first = false;
+				makeOval(x-10, y-10, 20, 20);
+				s = ojGetItemName();
+				color = "black";
+				if (!wholeStr) s = substring(s, 0, 1);
+				makeText(s, x + 4, y-fontSize/2);
+				run("Properties... ", "name=[] position=none stroke=&color font="+fontSize+" fill=none");
+				run("Add Selection...");
+				run("Select None");
+			}
+		}
+	}
+	ojSelectObject(0);
+}
+
+macro "Clear all to start again"{
+	run("Remove Overlay");
+	itemNames = split(ojGetItemNames());
+	nTypes = itemNames.length;
+	for (m=1; m < nTypes; m++){ojDeleteItem(nTypes, m);
+	}
+	if (check == 1){
+	    getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+	    time = (year + month + dayOfMonth + hour+minute+second);
+	    File.rename(dir+name,dir+name+time);
+	}
+}   
+
+//Produce the count Results
+macro "Show Count Results"{
+	run("Clear Results");
+	itemNames = split(ojGetItemNames());
+	maxImg = ojNImages();
+	nTypes = itemNames.length;
+	totalCounts = newArray(nTypes);
+	for (img = 1; img <= maxImg; img++){
+		fname  = ojGetImageName(img);
+		itemCounts = newArray(nTypes);
+		setResult("Label", img-1, fname);
+		for (obj = ojFirstObject(img); obj <= ojLastObject(img); obj++){
+			ojSelectObject(obj);
+			
+			for (kk = 0; kk < nTypes; kk++){
+				name = ojGetItemName();
+				if (name == itemNames[kk]){
+					itemCounts[kk]++;
+					totalCounts[kk]++;
+				}
+			}	
+		}
+		for (kk = 0; kk < nTypes; kk++)
+			setResult(itemNames[kk], img - 1, itemCounts[kk]);
+	}
+	setResult("Label", maxImg, "__Total__");
+	for (kk = 0; kk < nTypes; kk++)
+		setResult(itemNames[kk], maxImg, totalCounts[kk]);
+	updateResults;
+	ojSelectObject(0);
+	selectWindow("Results");
+}
+//Ask the user for the number of random point, default 50
+var n=50
+macro "Set the number of random points (default 50) [n]"{
+	Dialog.create("Enter the number of points");
+	Dialog.addNumber("Number",n);
+	Dialog.show();
+	n = Dialog.getNumber();
+}
+
+// draw the number of points defined earlier
+macro "Draw Random Points [0]"{
+	Overlay.remove;
+	dotSize = 25;
+	setLineWidth(5);
+	setColor(255,0,0);
+	width = getWidth();
+	height = getHeight();
+//check if coordinate file exists
+	check = File.exists(dir+name);
+	if (check == 0){
+	  f = File.open(dir+name);
+	  for (j=0; j<n; j++) {
+	  x = random()*width-dotSize/2;
+	  y = random()*height-dotSize/2;
+	  print(f,x+ "\t" + y);
+	  Overlay.drawEllipse(x, y, dotSize, dotSize);
+	}
+	File.close(f);
+	} else {
+	  filestring=File.openAsString(dir+name);
+	  rows=split(filestring, "\n");
+	  x=newArray(rows.length);
+	  y=newArray(rows.length);
+	  for(ii=0; ii<rows.length; ii++){
+	    columns=split(rows[ii],"\t");
+	    x[ii]=parseInt(columns[0]);
+	    y[ii]=parseInt(columns[1]);
+	    Overlay.drawEllipse(x[ii], y[ii], dotSize, dotSize);
+	  } 
+	}
+	Overlay.show;
+}
+
+
+
