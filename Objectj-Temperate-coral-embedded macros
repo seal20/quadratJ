@@ -68,10 +68,11 @@ function updateMyLabels(wholeStr){
 
 macro "Clear all to start again"{
 	run("Remove Overlay");
-	itemNames = split(ojGetItemNames());
-	nTypes = itemNames.length;
-	for (m=1; m < nTypes; m++){ojDeleteItem(nTypes, m);
-	}
+//	itemNames = split(ojGetItemNames());
+//	nTypes = itemNames.length;
+//	for (m=1; m < nTypes; m++){ojDeleteItem(nTypes, m);
+//	}
+//	ojDeleteObject(1)
 	if (check == 1){
 	    getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
 	    time = (year + month + dayOfMonth + hour+minute+second);
