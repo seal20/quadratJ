@@ -145,7 +145,7 @@ macro "Draw Random Points [0]"{
 	  x = random()*width-dotSize/2;
 	  X=abs(x);
 	  y = random()*height-dotSize/2;
-	  Y=abs(y)
+	  Y=abs(y);
 	  print(f,X+ "\t" + Y);
 	  Overlay.drawEllipse(X, Y, dotSize, dotSize);
 	}
