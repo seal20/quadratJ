@@ -143,9 +143,11 @@ macro "Draw Random Points [0]"{
 	  f = File.open(dir+name);
 	  for (j=0; j<n; j++) {
 	  x = random()*width-dotSize/2;
+	  X=abs(x);
 	  y = random()*height-dotSize/2;
-	  print(f,x+ "\t" + y);
-	  Overlay.drawEllipse(x, y, dotSize, dotSize);
+	  Y=abs(y)
+	  print(f,X+ "\t" + Y);
+	  Overlay.drawEllipse(X, Y, dotSize, dotSize);
 	}
 	File.close(f);
 	} else {
