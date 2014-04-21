@@ -117,6 +117,9 @@ macro "Show Count Results"{
 	ojSelectObject(0);
 	selectWindow("Results");
 }
+
+//*****************
+//Draw random points
 //Ask the user for the number of random point, default 50
 var n=50
 macro "Set the number of random points (default 50) [n]"{
@@ -165,5 +168,23 @@ macro "Draw Random Points [0]"{
 	Overlay.show;
 }
 
-
-
+//*****************
+//Draw a grid
+macro "Draw points on a grid [-]"{
+  Overlay.remove;
+  dotSize = 25;
+  setLineWidth(5);
+  setColor(255,0,0);
+  width = getWidth();
+  height = getHeight();
+  xinter = width/9;
+  yinter = height/9;
+  for(jj=1;jj<9; jj++){
+    for(kk=1;kk<9;kk++){
+      x=0+xinter*kk-dotSize/2;
+      y=0+yinter*jj-dotSize/2;
+      Overlay.drawEllipse(x, y, dotSize, dotSize);
+    }
+  }
+}
+      
