@@ -120,10 +120,10 @@ macro "Show Count Results"{
 
 //*****************
 //Draw random points
-//Ask the user for the number of random point, default 50
+//Ask the user for the number of point, default 64
 var n=50
-macro "Set the number of random points (default 50) [n]"{
-	Dialog.create("Enter the number of points");
+macro "Set the number of points (default 50) [n]"{
+	Dialog.create("Enter the number of points ");
 	Dialog.addNumber("Number",n);
 	Dialog.show();
 	n = Dialog.getNumber();
@@ -144,7 +144,7 @@ macro "Draw Random Points [0]"{
 	check = File.exists(dir+name);
 	if (check == 0){
 	  f = File.open(dir+name);
-	  for (j=0; j<n; j++) {
+	  for (j=0; j<(n*n); j++) {
 	  x = random()*width-dotSize/2;
 	  X=abs(x);
 	  y = random()*height-dotSize/2;
@@ -182,9 +182,75 @@ macro "Draw points on a grid [-]"{
   for(jj=1;jj<9; jj++){
     for(kk=1;kk<9;kk++){
       x=0+xinter*kk-dotSize/2;
+	print(x);
       y=0+yinter*jj-dotSize/2;
       Overlay.drawEllipse(x, y, dotSize, dotSize);
     }
   }
+Overlay.show;
 }
-      
+
+
+macro "test [t]"{
+//define infinity
+  Infinity = 1.0/0.0; 
+//read the position of the quadrats from user input
+	run("Select None");
+	waitForUser("Draw a polygon of your quadrats using the polygon tools and then press ok");
+	getSelectionCoordinates(x, y);
+	  tlx=x[0];
+	  tly=y[0];
+	  trx=x[1];
+	  try=y[1];
+	  brx=x[2];
+	  bry=y[2];
+	  blx=x[3];
+	  bly=y[3];
+	  print(tlx,trx,blx,brx);
+	  print(tly,try,bly,bry);
+Overlay.remove;
+	dotSize = 25;
+	setLineWidth(5);
+	setColor(255,0,0);
+//calculate the equation describing the top frame
+	slopeTop = (try - tly)/(trx-tlx);
+	print(slopeTop,"slopeTop");
+	interceptTop = tly-(slopeTop*tlx);
+	print(interceptTop,"interceptTop");
+//calculate the equation describing the right frame
+	slopeRight = (bry-try)/(brx-trx);
+	print(slopeRight,"slopeRight");
+	interceptRight = try-(slopeRight*trx);
+	print(interceptRight,"interceptRight");
+//calculate the equation describing the bottom frame
+	slopeBottom = (bry-bly)/(brx-blx);
+	print(slopeBottom,"slopeBottom");
+	interceptBottom = bly-(slopeBottom*blx);
+	print(interceptBottom,"interceptBottom");
+//calculate the equation describing the left frame
+	slopeLeft= (bly-tly)/(blx-tlx);
+	print(slopeLeft,"slopeLeft");
+	interceptLeft = tly-(slopeLeft*tlx);
+	print(interceptLeft,"interLeptLeft");
+//determine the shift to apply to the intercepts for 8*8 points within the quadrats
+//topShift is the difference between the intercept of the top and bottom frame
+	topShift=(interceptBottom-interceptTop)/9;
+	print(topShift,"topShift")
+//leftShift is the difference between the intercept of the left and right bottom frame
+//	if(interceptRight=Infinity || interceptLeft=Infinity){
+//	  LeftShift=(trx-tlx)/9;
+//	}else{
+	  leftShift=(interceptLeft-interceptRight)/9;
+//	}
+	print(leftShift,"leftShift")
+//determine the position of each points starting from the top left corner
+      for(jj=1;jj<9; jj++){
+	for(kk=1;kk<9;kk++){
+	  x=((interceptLeft+leftShift*kk)-(interceptTop+topShift*jj))/(slopeTop-slopeLeft);
+	  y=x*slopeTop+(interceptTop+topShift*jj);
+	  print(x,y);
+	  Overlay.drawEllipse(x, y, dotSize, dotSize);
+	}
+      }
+Overlay.show;     
+}
