@@ -170,114 +170,104 @@ macro "Draw Random Points [0]"{
 
 //*****************
 //Draw a grid
+
+
 macro "Draw points on a grid [-]"{
-  Overlay.remove;
-  dotSize = 25;
-  setLineWidth(5);
-  setColor(255,0,0);
-  width = getWidth();
-  height = getHeight();
-  xinter = width/9;
-  yinter = height/9;
-  for(jj=1;jj<9; jj++){
-    for(kk=1;kk<9;kk++){
-      x=0+xinter*kk-dotSize/2;
-	print(x);
-      y=0+yinter*jj-dotSize/2;
-      Overlay.drawEllipse(x, y, dotSize, dotSize);
-    }
-  }
-Overlay.show;
-}
-
-
-macro "test [t]"{
-//define infinity
-  Infinity = 1.0/0.0; 
+//Prepare to Draw drawEllipse
+	Overlay.remove;
+	dotSize = 25;
+	setLineWidth(5);
+	setColor(255,0,0);
 //read the position of the quadrats from user input
 	run("Select None");
 	waitForUser("Draw a polygon of your quadrats using the polygon tools and then press ok");
 	getSelectionCoordinates(x, y);
-	  tlx=x[0];
-	  tly=y[0];
-	  trx=x[1];
-	  try=y[1];
-	  brx=x[2];
-	  bry=y[2];
-	  blx=x[3];
-	  bly=y[3];
-	  print(tlx,trx,blx,brx);
-	  print(tly,try,bly,bry);
-Overlay.remove;
-	dotSize = 25;
-	setLineWidth(5);
-	setColor(255,0,0);
+	tlx=x[0];
+	tly=y[0];
+	trx=x[1];
+	try=y[1];
+	brx=x[2];
+	bry=y[2];
+	blx=x[3];
+	bly=y[3];
 //calculate the equation describing the top frame
 	slopeTop = (try - tly)/(trx-tlx);
-	print(slopeTop,"slopeTop");
 	interceptTop = tly-(slopeTop*tlx);
-	print(interceptTop,"interceptTop");
+//	print("Top",slopeTop,interceptTop);
 //calculate the equation describing the right frame
 	slopeRight = (bry-try)/(brx-trx);
-	print(slopeRight,"slopeRight");
 	interceptRight = try-(slopeRight*trx);
-	print(interceptRight,"interceptRight");
+//	print("Right",slopeRight,interceptRight);
 //calculate the equation describing the bottom frame
 	slopeBottom = (bry-bly)/(brx-blx);
-	print(slopeBottom,"slopeBottom");
 	interceptBottom = bly-(slopeBottom*blx);
-	print(interceptBottom,"interceptBottom");
+//	print("Bottom",slopeBottom,interceptBottom);
 //calculate the equation describing the left frame
 	slopeLeft= (bly-tly)/(blx-tlx);
-	print(slopeLeft,"slopeLeft");
 	interceptLeft = tly-(slopeLeft*tlx);
-	print(interceptLeft,"interLeptLeft");
-//determine the intercept of the top and bottom (horizontal) tbx and tby
+//	print("Left",slopeLeft,interceptLeft);
+//determine the crossing point of the top and bottom (horizontal) tbx and tby
 	tbx=(interceptBottom-interceptTop)/(slopeTop-slopeBottom);
 	tby=slopeBottom*tbx+interceptBottom;
-//determine the intercept of the left and right lrx and lry
+//	print(tbx,tby);
+//determine the crossing point of the left and right lrx and lry
 	lrx=(interceptRight-interceptLeft)/(slopeLeft-slopeRight);
 	lry=slopeLeft*tbx+interceptLeft;
-//determine the difference between the intercept of the top and bottom frame and divide by 9 to get 8 interval on the vertical
+//	print(lrx,lry);
+//determine the difference between the intercept of the top and bottom frame and divide by 9 to get 8 interval on the vertical 
 //store the results in an array
-	xInterval = newArray(9);
-	horizontalShift=(interceptLeft-interceptRight)/9;
-	for (i=0;i<8:i++){
-	  xInterval[i]=interceptLeft-horizontalShift*i;
+	xInterval = newArray(8);
+	horizontalShift=((-interceptRight/slopeRight)+(interceptLeft/slopeLeft))/9;
+//	print(horizontalShift);
+	for (i=0;i<8;i++){
+	  xInterval[i]=(0-interceptLeft/slopeLeft)+horizontalShift*(i+1);
+//	  print("xInterval",xInterval[i]);  
 	}
-//determine the difference between the intercept of the left and right frame and divide by 9 to get 8 interval on the horizontal
-	yInterval= newArray(9);
+	Array.show(xInterval);
+//determine the difference between the intercept of the left and right frame and divide by 9 to get 8 interval on the horizontal 
+	yInterval= newArray(8);
 	verticalShift=(interceptBottom-interceptTop)/9;
 	for (j=0;j<8;j++){
-	  yInterval[j]=interceptBottom-verticalShift*j;
+	  yInterval[j]=interceptBottom-verticalShift*(j+1);
+//	  print("yInterval", yInterval[j]);
 	}
+//	Array.show(yInterval);
 //determin the equation of all horizontal line
+	horizontalSlope=newArray(8);
+	horizontalIntercept=newArray(8);
 	for (k=0;k<8;k++){
-	  DetermineEquation(horizontalSlope,horizontalIntercept,tbx,tby,yInterval[k]);
+	  horizontalSlope[k]=(tby-yInterval[k])/tbx;
+	  horizontalIntercept[k]=tby-horizontalSlope[k]*tbx;
+//	  print("horizontalSlope",horizontalSlope[k]);
+///	  print("horizontalIntercept",horizontalIntercept[k]);
 	}
-	Array.show(horizontalSlope);
-	Array.show(horizontalIntercept);
+//	Array.show(horizontalSlope);
+//	Array.show(horizontalIntercept);
 //determin the equation of all vertical line
+	verticalSlope=newArray(8);
+	verticalIntercept=newArray(8);
 	for (l=0;l<8;l++){
-	  DetermineEquation(verticalSlope,verticalIntercept,lrx,lry,xInterval[k]);
+	  verticalSlope[l]=(lry)/(lrx-xInterval[l]);
+	  verticalIntercept[l]=lry-verticalSlope[l]*lrx;
+//	  print("verticalSlope",verticalSlope[l]);
+//	  print("verticalIntercept",verticalIntercept[l]);
 	}
 	Array.show(verticalSlope);
 	Array.show(verticalIntercept);
 //Determine the crossing point of each line
 	for (ii=0;ii<8;ii++){
 	  for (jj=0;jj<8;jj++){
-	    x=(horizontalIntercept[jj]-verticalIntercept[ii])/(horizontalSlope[jj]-verticalSlope[ii]);
-	    y=horizontalSlope*x[kk]+horizontalIntercept;
+	    x=-(horizontalIntercept[jj]-verticalIntercept[ii])/(horizontalSlope[jj]-verticalSlope[ii]);
+	    y=horizontalSlope[jj]*x+horizontalIntercept[jj];
+//	    print(x,y);
 	    Overlay.drawEllipse(x, y, dotSize, dotSize);
 	  }
 	}
 Overlay.show;     
 }  
 
-
-function DetermineEquation(slope,intercept,x0,y0,yi){
-	slope=newArray(9);
-	slope[i]=(y0-yi)/(x0);
-	intercept = newArray(9);	
-	intercept[i] = y0 -(slope[i]*x0);
-}
+//May be goo to shift to a function some day, something like this
+//function DetermineEquation(slope,intercept,x0,y0,yi){
+//	slope[i]=(y0-yi)/(x0);
+//	intercept[i] = y0 -(slope[i]*x0);
+//}
